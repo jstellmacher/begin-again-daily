@@ -10,10 +10,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Frontend URL (set this in Render)
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+/* -------------------- FRONTEND -------------------- */
+// IMPORTANT: hardcoded to prevent localhost leaks
+const FRONTEND_URL = "https://begin-again-daily.pages.dev";
 
-// Stripe init (test or live depending on env)
+/* -------------------- STRIPE -------------------- */
 const stripeEnabled = Boolean(
   process.env.STRIPE_SECRET_KEY &&
   !process.env.STRIPE_SECRET_KEY.includes("placeholder"),
@@ -25,8 +26,7 @@ const stripe = stripeEnabled
     })
   : null;
 
-/* -------------------- IMPORTANT FIX -------------------- */
-// CORS MUST BE BEFORE ROUTES
+/* -------------------- CORS -------------------- */
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://begin-again-daily.pages.dev"],
@@ -38,11 +38,18 @@ app.use(express.json());
 
 /* -------------------- ROUTES -------------------- */
 
+// HEALTH CHECK
+app.get("/", (req, res) => {
+  res.json({ status: "Begin Again API running" });
+});
+
 // CREATE CHECKOUT SESSION
 app.post("/create-checkout-session", async (req, res) => {
   try {
     if (!stripe) {
-      return res.json({ url: "/success?session_id=demo-session" });
+      return res.json({
+        url: `${FRONTEND_URL}/success?session_id=demo-session`,
+      });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -60,6 +67,8 @@ app.post("/create-checkout-session", async (req, res) => {
           quantity: 1,
         },
       ],
+
+      // ✅ FIXED: no localhost fallback anywhere
       success_url: `${FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${FRONTEND_URL}/cancel`,
     });
@@ -93,11 +102,7 @@ app.post("/verify-session", async (req, res) => {
   }
 });
 
-// HEALTH CHECK
-app.get("/", (req, res) => {
-  res.json({ status: "Begin Again API running" });
-});
-
+/* -------------------- START SERVER -------------------- */
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server running on http://localhost:${port}`);
 });
