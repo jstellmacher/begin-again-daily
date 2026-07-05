@@ -8,10 +8,16 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Frontend URL (set this in Render)
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+
+// Stripe init (test or live depending on env)
 const stripeEnabled = Boolean(
   process.env.STRIPE_SECRET_KEY &&
   !process.env.STRIPE_SECRET_KEY.includes("placeholder"),
 );
+
 const stripe = stripeEnabled
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: "2023-10-16",
@@ -20,6 +26,7 @@ const stripe = stripeEnabled
 
 app.use(express.json());
 
+// CREATE CHECKOUT SESSION
 app.post("/create-checkout-session", async (req, res) => {
   try {
     if (!stripe) {
@@ -41,8 +48,8 @@ app.post("/create-checkout-session", async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `${req.headers.origin || "http://localhost:5173"}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin || "http://localhost:5173"}/cancel`,
+      success_url: `${FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${FRONTEND_URL}/cancel`,
     });
 
     res.json({ url: session.url });
@@ -52,6 +59,7 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
+// VERIFY SESSION
 app.post("/verify-session", async (req, res) => {
   try {
     const { session_id } = req.body;
@@ -71,6 +79,11 @@ app.post("/verify-session", async (req, res) => {
     console.error(error);
     res.json({ paid: false });
   }
+});
+
+// HEALTH CHECK (optional but useful for Render)
+app.get("/", (req, res) => {
+  res.json({ status: "Begin Again API running" });
 });
 
 app.listen(port, "0.0.0.0", () => {
