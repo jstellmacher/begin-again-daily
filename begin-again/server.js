@@ -2,6 +2,7 @@ import express from "express";
 import Stripe from "stripe";
 import path from "path";
 import { fileURLToPath } from "url";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,7 +25,18 @@ const stripe = stripeEnabled
     })
   : null;
 
+/* -------------------- IMPORTANT FIX -------------------- */
+// CORS MUST BE BEFORE ROUTES
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://begin-again-daily.pages.dev"],
+    methods: ["GET", "POST", "OPTIONS"],
+  }),
+);
+
 app.use(express.json());
+
+/* -------------------- ROUTES -------------------- */
 
 // CREATE CHECKOUT SESSION
 app.post("/create-checkout-session", async (req, res) => {
@@ -81,7 +93,7 @@ app.post("/verify-session", async (req, res) => {
   }
 });
 
-// HEALTH CHECK (optional but useful for Render)
+// HEALTH CHECK
 app.get("/", (req, res) => {
   res.json({ status: "Begin Again API running" });
 });
