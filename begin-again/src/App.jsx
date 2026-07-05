@@ -44,13 +44,17 @@ function LandingPage() {
 
       const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.error || "Checkout failed");
+      }
+
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error("Checkout is unavailable right now.");
+        throw new Error("Checkout session not created");
       }
     } catch (error) {
-      setCheckoutError(error.message);
+      setCheckoutError(error.message || "Something went wrong");
     } finally {
       setIsCheckingOut(false);
     }
@@ -60,11 +64,10 @@ function LandingPage() {
     <main className="min-h-screen bg-stone-50 text-stone-900">
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-5 py-6 sm:px-8 lg:px-10">
         <header className="mb-10 flex items-center justify-between border-b border-stone-200 pb-4">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-stone-500">
-              Begin Again
-            </p>
-          </div>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-stone-500">
+            Begin Again
+          </p>
+
           <a href="#product" className="text-sm font-medium text-sky-600">
             See the planner
           </a>
@@ -75,11 +78,13 @@ function LandingPage() {
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.28em] text-sky-600">
               Digital product
             </p>
+
             <h1 className="text-4xl font-semibold tracking-[-0.04em] sm:text-5xl lg:text-6xl">
               Small steps.
               <br />
               Real progress.
             </h1>
+
             <p className="mt-4 max-w-xl text-lg leading-8 text-stone-600">
               A calm, focused planner for the days when your brain needs a reset
               instead of pressure.
@@ -88,82 +93,50 @@ function LandingPage() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <a
                 href="#product"
-                className="rounded-full border border-stone-300 px-5 py-3 text-center text-sm font-medium text-stone-900 transition hover:border-stone-400"
+                className="rounded-full border border-stone-300 px-5 py-3 text-center text-sm font-medium"
               >
                 Preview
               </a>
 
               <button
-                type="button"
                 onClick={handleCheckout}
                 disabled={isCheckingOut}
-                className="rounded-full bg-sky-600 px-5 py-3 text-center text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-400"
+                className="rounded-full bg-sky-600 px-5 py-3 text-sm font-medium text-white disabled:opacity-60"
               >
-                {isCheckingOut ? "Preparing checkout…" : "Buy now for $9"}
+                {isCheckingOut ? "Loading..." : "Buy now for $9"}
               </button>
             </div>
 
-            {checkoutError ? (
-              <p className="mt-3 text-sm text-rose-600">{checkoutError}</p>
-            ) : null}
+            {checkoutError && (
+              <p className="mt-3 text-sm text-red-600">{checkoutError}</p>
+            )}
           </div>
 
-          <div
-            id="product"
-            className="relative overflow-hidden rounded-[24px] border border-stone-200 bg-stone-100 p-4"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.16),_transparent_45%)]" />
+          <div id="product" className="rounded-[24px] border bg-stone-100 p-4">
+            <div className="rounded-[20px] bg-white p-5">
+              <p className="text-sm uppercase text-stone-500">
+                ADHD Reset Planner
+              </p>
 
-            <div className="relative rounded-[20px] border border-stone-200 bg-white p-5 shadow-sm">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-stone-500">
-                    ADHD Reset Planner
-                  </p>
-                  <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em]">
-                    A gentle reset for your week
-                  </h2>
-                </div>
-                <div className="rounded-full bg-sky-600 px-3 py-1 text-sm font-medium text-white">
-                  $9
-                </div>
-              </div>
+              <h2 className="mt-1 text-xl font-semibold">
+                A gentle reset for your week
+              </h2>
 
-              <div className="relative h-56 overflow-hidden rounded-[18px] border border-dashed border-stone-300 bg-stone-50 p-4">
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(248,250,252,0.5))]" />
-
-                <div className="relative flex h-full flex-col justify-between rounded-[14px] border border-stone-200 bg-white p-4">
-                  <div>
-                    <p className="text-sm font-medium text-stone-500">
-                      Preview only
-                    </p>
-                    <p className="mt-2 text-xl font-semibold tracking-[-0.02em] text-stone-900">
-                      Reset planner + calendar
-                    </p>
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="rounded-full border border-white/80 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-stone-700 backdrop-blur">
-                    Preview only
-                  </span>
-                </div>
+              <div className="mt-6 h-40 rounded border border-dashed bg-stone-50 flex items-center justify-center text-stone-400">
+                Preview only
               </div>
             </div>
           </div>
         </section>
 
         <section className="mt-10 grid gap-4 md:grid-cols-3">
-          {features.map((feature) => (
-            <article
-              key={feature}
-              className="rounded-[24px] border border-stone-200 bg-white p-5 shadow-sm"
+          {features.map((f) => (
+            <div
+              key={f}
+              className="rounded-[20px] border bg-white p-5 text-stone-700"
             >
-              <p className="text-sm font-medium uppercase tracking-[0.24em] text-stone-500">
-                Simple
-              </p>
-              <p className="mt-2 text-lg leading-7 text-stone-700">{feature}</p>
-            </article>
+              {f}
+            </div>
           ))}
         </section>
       </div>
@@ -174,67 +147,59 @@ function LandingPage() {
 function SuccessPage() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("checking");
-  const [message, setMessage] = useState("Confirming your payment…");
+  const [message, setMessage] = useState("Confirming payment...");
 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
 
     if (!sessionId) {
       setStatus("error");
-      setMessage("We could not confirm your payment yet.");
+      setMessage("Missing session.");
       return;
     }
 
-    async function verifySession() {
+    async function verify() {
       try {
-        const response = await fetch(`${API_URL}/verify-session`, {
+        const res = await fetch(`${API_URL}/verify-session`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ session_id: sessionId }),
         });
 
-        const data = await response.json();
+        const data = await res.json();
 
         if (data.paid) {
           setStatus("verified");
           setMessage("You're in. Begin Again starts now.");
         } else {
           setStatus("error");
-          setMessage("Your payment is still being confirmed.");
+          setMessage("Payment not confirmed yet.");
         }
       } catch {
         setStatus("error");
-        setMessage("We could not verify your session right now.");
+        setMessage("Verification failed.");
       }
     }
 
-    verifySession();
+    verify();
   }, [searchParams]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 py-10 text-stone-900">
-      <div className="w-full max-w-xl rounded-[32px] border border-stone-200 bg-white p-8 text-center shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-600">
-          Success
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
-          {message}
-        </h1>
+    <main className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="bg-white p-8 rounded-xl text-center">
+        <h1 className="text-xl font-semibold">{message}</h1>
 
         {status === "verified" ? (
           <a
             href="/downloads/full-planner.pdf"
             download
-            className="mt-6 inline-flex rounded-full bg-sky-600 px-5 py-3 text-sm font-medium text-white"
+            className="mt-4 inline-block bg-sky-600 text-white px-4 py-2 rounded"
           >
-            Download your planner
+            Download
           </a>
         ) : (
-          <Link
-            to="/"
-            className="mt-6 inline-flex rounded-full border px-5 py-3 text-sm"
-          >
-            Return home
+          <Link to="/" className="mt-4 inline-block text-sky-600">
+            Back home
           </Link>
         )}
       </div>
@@ -244,16 +209,11 @@ function SuccessPage() {
 
 function CancelPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 py-10 text-stone-900">
-      <div className="w-full max-w-xl rounded-[32px] border bg-white p-8 text-center">
-        <h1 className="text-3xl font-semibold">
-          No pressure. Try again anytime.
-        </h1>
-        <Link
-          to="/"
-          className="mt-6 inline-flex rounded-full bg-sky-600 px-5 py-3 text-white"
-        >
-          Return home
+    <main className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="bg-white p-8 rounded-xl text-center">
+        <h1>No worries — try again anytime.</h1>
+        <Link to="/" className="mt-4 inline-block text-sky-600">
+          Back home
         </Link>
       </div>
     </main>
