@@ -4,14 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"vite\" \"node server.js\"",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.2",
+    "concurrently": "^10.0.3",
+    "express": "^5.2.1",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1",
+    "stripe": "^22.3.0",
+    "tailwindcss": "^4.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
