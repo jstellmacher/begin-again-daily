@@ -12,7 +12,11 @@ const stripeEnabled = Boolean(
   process.env.STRIPE_SECRET_KEY &&
   !process.env.STRIPE_SECRET_KEY.includes("placeholder"),
 );
-const stripe = stripeEnabled ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+const stripe = stripeEnabled
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2023-10-16",
+    })
+  : null;
 
 app.use(express.json());
 
